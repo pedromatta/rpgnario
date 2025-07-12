@@ -1,0 +1,51 @@
+@page "/Sistemas"
+@inject SistemaAPI sistemaAPI
+
+<MudStack Class="mt-4 mb-4" Row="true" Justify="Justify.SpaceBetween">
+    <MudText Class="mb-4" Typo="Typo.h4">Sistemas Registrados</MudText>
+    <div class="mb-4 d-flex justify-space-between">
+        <Filter></Filter>
+        <MudPagination Count="@totalPaginas" SelectedChanged="PaginaMudou"></MudPagination>
+    </div>
+</MudStack>
+@if (sistemasPorPagina is not null)
+{
+    <MudGrid Class="align-stretch">
+        @foreach (var sistema in sistemasPorPagina)
+        {
+            <MudItem xs="3" Style="height: 100%;">
+                <CardSistema Sistema =sistema/>
+            </MudItem>            
+        }
+    </MudGrid>
+}
+
+
+@code {
+    private int tamanho = 8;
+    private int totalItens;
+    private int totalPaginas;
+    private ICollection<SistemaResponse>? sistemas;
+    private ICollection<SistemaResponse>? sistemasPorPagina;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        sistemas = await sistemaAPI.GetSistemasAsync();
+        if (sistemas is not null)
+        {
+            sistemas = sistemas.OrderByDescending(a => a.Id).ToList();
+            totalItens = sistemas.Count();
+            totalPaginas = Convert.ToInt32(Math.Ceiling((totalItens * 1.0) / tamanho));
+            this.PaginaMudou(1);
+        }
+
+    }
+    private void PaginaMudou(int pageNumber)
+    {
+        var indice = pageNumber - 1;
+        sistemasPorPagina = sistemas!
+            .Skip(tamanho * indice)
+            .Take(tamanho)
+            .ToList();
+    }
+}

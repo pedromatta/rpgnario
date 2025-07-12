@@ -1,0 +1,120 @@
+@page "/EditarEditora/{NomeEditora}"
+@inject EditoraAPI editoraAPI
+@inject NavigationManager navigationManager
+
+<MudPaper Class="px-8 pt-2 pb-4 mx-12 my-8 justify-center">
+    <div class="d-flex justify-space-between mt-8">
+        <MudText Typo="Typo.h4">Edicao de Editora</MudText>
+        <MudButton Variant="Variant.Text" @onclick="Voltar" Color="Color.Surface">
+            <MudIcon Icon="@Icons.Material.Filled.ArrowBack"></MudIcon>
+        </MudButton>
+    </div>
+    <MudForm>
+        <MudTextField Class="mt-4" T="string" Placeholder="Nome da Editora"
+                    Variant="Variant.Outlined"
+                    @bind-Value="nome"
+                    Required="true"
+                    RequiredError="Campo obrigatorio." />
+
+        <MudTextField Class="mt-4" T="string" Placeholder="Tipo da Editora"
+                    Variant="Variant.Outlined"
+                    @bind-Value="tipo"
+                    Required="true"
+                    RequiredError="Campo obrigatorio." />
+
+        <MudTextField Class="mt-4" T="string" Placeholder="Site oficial"
+                    Variant="Variant.Outlined"
+                    @bind-Value="siteOficial"
+                    Required="false" />
+        
+
+        <div class="d-flex align-center justify-space-between">
+            <div class="d-flex align-center justify-start mt-4">
+                <MudImage Class="mt-4 mr-2" src="@fileImage" />
+                <MudFileUpload T="IBrowserFile" Accept=".jpeg, .jpg, .png" FilesChanged="UploadFile" >
+                    <ActivatorContent>
+                        <MudButton HtmlTag="label"
+                                    Variant="Variant.Filled"
+                                    Color="Color.Primary"
+                                    StartIcon="@Icons.Material.Filled.PhotoCamera">
+                            Foto de Perfil
+                        </MudButton>
+                    </ActivatorContent>
+                </MudFileUpload>
+            </div>
+            
+            <div class="d-flex align-center justify-end mt-4">
+                <MudButton Variant="Variant.Filled"
+                        @onclick="Deletar"
+                        Color="Color.Warning">
+                        Deletar
+                </MudButton>
+                <MudButton Variant="Variant.Filled"
+                        @onclick="Editar"
+                        Color="Color.Primary"
+                        Class="ml-2">
+                        Confirmar
+                </MudButton>
+            </div>
+        </div>
+
+    </MudForm>
+</MudPaper>
+
+@code {
+    private string? nome;
+    private string? tipo;
+    private string? siteOficial;
+    private string? fileImage;
+    private string? fotoPerfil;
+
+    [Parameter]
+    public string? NomeEditora { get; set; }
+    public EditoraResponse? Editora { get; set; }
+
+    private void Voltar()
+    {
+        navigationManager.NavigateTo("/Editoras");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Editora = await editoraAPI.GetEditoraPeloNomeAsync(NomeEditora!);
+
+        nome = Editora!.Nome;
+        tipo = Editora!.Tipo;
+        siteOficial = Editora!.SiteOficial;
+
+        if(Editora!.Foto!.Contains("Foto"))
+        {
+            fileImage = $"http://localhost:5100{Editora!.Foto}";
+        }
+    }
+
+    private async Task Deletar()
+    {
+        await editoraAPI.DeleteEditoraAsync(Editora!.Id);
+        navigationManager.NavigateTo("/Editoras");
+    }
+    private async Task Editar()
+    {
+        var editoraRequestEdit = new EditoraRequestEdit(Editora!.Id, nome!, tipo!, siteOficial!, fotoPerfil ?? Editora!.Foto);
+        await editoraAPI.PutEditoraAsync(editoraRequestEdit);
+        navigationManager.NavigateTo("/Editoras");
+    }
+
+    private async Task UploadFile(IBrowserFile file)
+    {
+        var format = "image/jpeg";
+        var resizedImage = await file.RequestImageFileAsync(format, 200, 200);
+
+        using var fileStream = resizedImage.OpenReadStream();
+        using var memoryStream = new MemoryStream();
+        await fileStream.CopyToAsync(memoryStream);
+
+        var imageUpload = Convert.ToBase64String(memoryStream.ToArray());
+        fileImage = $"data:{format};base64,{imageUpload}";
+
+        fotoPerfil = imageUpload;
+    }
+}

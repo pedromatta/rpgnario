@@ -1,0 +1,220 @@
+@page "/EditarSistema/{NomeSistema}"
+@inject EditoraAPI editoraAPI
+@inject GeneroAPI generoAPI
+@inject SistemaAPI sistemaAPI
+@inject NavigationManager navigationManager
+
+<MudPaper Class="px-8 pt-2 pb-4 mx-12 my-8 justify-center">
+
+    <div class="d-flex justify-space-between mt-8">
+        <MudText Typo="Typo.h4">Cadastro de Sistema</MudText>
+        <MudButton Variant="Variant.Text" @onclick="Voltar" Color="Color.Surface">
+            <MudIcon Icon="@Icons.Material.Filled.ArrowBack"></MudIcon>
+        </MudButton>
+    </div>
+
+    <MudForm>
+
+        <MudTextField Class="mt-4" T="string" Placeholder="Nome do Sistema"
+                      @bind-Value="nome"
+                      Variant="Variant.Outlined"
+                      Required="true"
+                      RequiredError="Campo obrigatório." />
+
+       <MudSelect Class="mt-4" T="EditoraResponse" Label="Editoras" 
+        Variant="Variant.Outlined" ValueChanged="EditoraSelecionada" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+            @if (editoras is not null)
+            {
+                @foreach(var editora in editoras)
+                {
+                    <MudSelectItem Value="editora" />
+                }
+            }
+       </MudSelect>
+
+
+       <MudSelect Class="mt-4" T="GeneroResponse" Label="Gêneros" 
+        Variant="Variant.Outlined" ValueChanged="GeneroSelecionado" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+            @if (generos is not null)
+            {
+                @foreach(var genero in generos)
+                {
+                    <MudSelectItem Value="genero" />
+                }
+            }
+       </MudSelect>
+
+        @if (GenerosSelecionados is not null)
+        {
+            foreach (var genero in GenerosSelecionados)
+            {
+                <div class="d-flex align-center mt-4 ml-2 gap-2">
+                    <MudText Typo="Typo.body1"><b>@(genero.Nome)</b> adicionado como genero do sistema.</MudText>
+                    <MudButton Variant="Variant.Text" OnClick="() => {GeneroRemovido(genero);}">x</MudButton>
+                </div>
+            }
+        }
+
+        <div class="d-flex align-cneter mt-4 ml-2 gap-2">
+            <MudTextField Class="mt-4" T="string" Placeholder="Novo genero"
+                        @bind-Value="novoGenero"
+                        Variant="Variant.Text"
+                        Required="false" />
+            <MudButton Variant="Variant.Text" OnClick="() => {GeneroSelecionado(new GeneroResponse(1, novoGenero!, string.Empty));}">Ok</MudButton>
+        </div>
+
+        <MudTextField Class="mt-4" T="string" Placeholder="Link para o Sistema"
+                      @bind-Value="link"
+                      Variant="Variant.Outlined"
+                      Required="false" />
+
+        <MudTextField Class="mt-4" T="string" Placeholder="Descricao"
+                      @bind-Value="descricao"
+                      Variant="Variant.Outlined"
+                      Required="false" />
+
+        <MudTextField Class="mt-4" T="string" Placeholder="Engine"
+                      @bind-Value="engine"
+                      Variant="Variant.Outlined"
+                      Required="false" />
+
+        <MudNumericField Class="mt-4" Placeholder="Ano de lançamento"
+                      @bind-Value="anoLancamento"
+                      Variant="Variant.Outlined"
+                      Lines="1"
+                      Required="true"
+                      RequiredError="Campo obrigatório." />
+
+        <div class="d-flex align-center justify-space-between mt-4">
+            <div class="d-flex align-center justify-start">
+                <MudImage Class="mt-4" src="@fileImage" />
+                <MudFileUpload T="IBrowserFile" Accept=".jpeg" FilesChanged="UploadFile" >
+                    <ActivatorContent>
+                        <MudButton HtmlTag="label"
+                                    Variant="Variant.Filled"
+                                    Color="Color.Primary"
+                                    StartIcon="@Icons.Material.Filled.PhotoCamera">
+                            Foto de Perfil
+                        </MudButton>
+                    </ActivatorContent>
+                </MudFileUpload>
+            </div>
+            <div class="d-flex align-center justify-end">
+                <MudButton Variant="Variant.Filled"
+                        @onclick="Deletar"
+                        Color="Color.Warning">
+                        Deletar
+                </MudButton>
+                <MudButton Variant="Variant.Filled"
+                        @onclick="Editar"
+                        Color="Color.Primary"
+                        Class="ml-2">
+                        Confirmar
+                </MudButton>
+            </div>
+        </div>
+
+    </MudForm>
+</MudPaper>
+
+@code {
+    [Parameter]
+    public string? NomeSistema { get; set; }
+    private string? nome;
+    private string? link;
+    private string? descricao;
+    private string? engine;
+    private string? fileImage;
+    private string? fotoPerfil;
+
+    private string? novoGenero;
+    private int anoLancamento;
+
+    private SistemaResponse? Sistema { get; set; }
+    private ICollection<EditoraResponse>? editoras;
+    private ICollection<GeneroResponse>? generos;
+    private EditoraResponse? EditoraDoSistema { get; set; }
+    private List<GeneroResponse>? GenerosSelecionados { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        editoras = await editoraAPI.GetEditorasAsync();
+        generos = await generoAPI.GetGenerosAsync();
+        Sistema = await sistemaAPI.GetSistemaPorNomeAsync(NomeSistema!);
+
+        nome = Sistema!.Nome;
+        link = Sistema!.Link;
+        descricao = Sistema!.Descricao;
+        engine = Sistema!.Engine;
+
+        if(Sistema!.Foto!.Contains("Foto"))
+        {
+            fileImage = $"http://localhost:5100{Sistema!.Foto}";
+        }
+    }
+    private void Voltar()
+    {
+        navigationManager.NavigateTo("/Sistemas");
+    }
+
+    public async Task Deletar()
+    {
+        await sistemaAPI.DeleteSistemaAsync(Sistema!.Id);
+        navigationManager.NavigateTo("/Sistemas");
+    }
+
+    private List<GeneroRequest> GeneroRequests { get; set; } = new();
+
+    public async Task Editar()
+    {
+        if (GenerosSelecionados is not null)
+        {
+            foreach(var genero in GenerosSelecionados)
+            {
+                GeneroRequests!.Add(new GeneroRequest(genero.Nome, genero.Descricao));
+            }
+        }
+
+        var sistemaRequestEdit = new SistemaRequestEdit(Sistema!.Id, nome!, link!, descricao!, engine ?? "Nao informada", anoLancamento, EditoraDoSistema!.Id, fotoPerfil ?? Sistema!.Foto, GeneroRequests);
+        await sistemaAPI.PutSistemaAsync(sistemaRequestEdit);
+
+        navigationManager.NavigateTo("/Sistemas");
+    }
+
+    private void EditoraSelecionada(EditoraResponse editoraSelecionada)
+    {
+        EditoraDoSistema = editoraSelecionada;
+    }
+    private void GeneroSelecionado(GeneroResponse generoSelecionado)
+    {
+        if (GenerosSelecionados is not null)
+        {
+            if (!GenerosSelecionados.Contains(generoSelecionado))
+            {
+                GenerosSelecionados.Add(generoSelecionado);
+            }
+        }
+    }
+    private void GeneroRemovido(GeneroResponse generoSelecionado)
+    {
+        if (GenerosSelecionados is not null)
+        {
+            GenerosSelecionados.Remove(generoSelecionado);
+        }
+    }
+
+    private async Task UploadFile(IBrowserFile file)
+    {
+        var format = "image/jpeg";
+        var resizedImage = await file.RequestImageFileAsync(format, 200, 200);
+
+        using var fileStream = resizedImage.OpenReadStream();
+        using var memoryStream = new MemoryStream();
+        await fileStream.CopyToAsync(memoryStream);
+
+        var imageUpload = Convert.ToBase64String(memoryStream.ToArray());
+        fileImage = $"data:{format};base64,{imageUpload}";
+
+        fotoPerfil = imageUpload;
+    }
+}

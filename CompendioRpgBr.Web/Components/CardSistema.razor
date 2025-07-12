@@ -1,0 +1,62 @@
+<MudCard Class="h-100 d-flex flex-column flex-grow-1">
+    <MudCardMedia Image=@Foto></MudCardMedia>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">@Sistema!.Nome</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent Class="flex-grow-1">
+        <MudText Typo="Typo.body2"><b>Engine </b>@Sistema!.Engine</MudText>
+        <MudText Typo="Typo.body2"><b>Ano de Lancamento </b>@Sistema!.AnoLancamento</MudText>
+        <MudText Typo="Typo.body2"><b>Editora </b>@Sistema!.NomeEditora</MudText>
+
+        @if(Generos is not null && Generos.Count > 0)
+        {
+            <MudText Typo="Typo.body2"><b>Generos </b>
+            <span>@Generos[0]</span>
+            @for(int i = 1; i < Generos.Count; i++)
+            {
+                <span>, @Generos[i]</span>
+            }
+            </MudText>
+        }
+        <MudText Typo="Typo.body2">
+            @if (descricaoExpandida)
+            {
+                @Sistema!.Descricao
+                <MudLink Typo="Typo.body2" @onclick="ToggleDescricao">Ver menos</MudLink>
+            }
+            else 
+            {
+                @Sistema!.Descricao.Substring(0, Math.Min(35, Sistema!.Descricao.Length))
+
+                @if (Sistema!.Descricao.Length > 35)
+                {
+                    @("... ")
+                    <MudLink Typo="Typo.body2" @onclick="ToggleDescricao">Ver mais</MudLink>
+                }
+            }
+        </MudText>
+        <MudLink Href="@Sistema!.Link">Link para o Sistema</MudLink>
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Color="Color.Warning" Variant="Variant.Outlined" Href=@($"/EditarSistema/{Sistema!.Nome}")>
+            Editar
+        </MudButton>
+    </MudCardActions>
+</MudCard>
+
+@code {
+    [Parameter]
+    public SistemaResponse? Sistema { get; set; }
+
+    private bool descricaoExpandida = false;
+    public List<string>? Generos  => Sistema!.GenerosNomes; 
+    
+    private string? Foto => Sistema!.Foto!.Contains("Foto") ? $"http://localhost:5100{Sistema.Foto}" : "/images/cardSistema.jpg";
+
+    private void ToggleDescricao()
+    {
+        descricaoExpandida = !descricaoExpandida;
+    }
+}

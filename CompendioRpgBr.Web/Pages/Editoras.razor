@@ -1,0 +1,48 @@
+﻿@page "/Editoras"
+@inject EditoraAPI editoraAPI
+
+<MudStack Class="mt-4 mb-4 justify-space-between" Row="true">
+    <MudText Class="mb-4" Typo="Typo.h4">Editoras Cadastradas</MudText>
+    <MudPagination Count="@totalPaginas" SelectedChanged="PaginaMudou"></MudPagination>
+</MudStack>
+@if(editorasPorPagina is not null)
+{
+    <MudGrid>
+        @foreach (var editora in editorasPorPagina)
+        {
+            <MudItem xs="3">
+                <CardEditora Editora="editora" />
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+@code {
+    private ICollection<EditoraResponse>? editoras;
+    private int tamanho = 8;
+    private int totalItens;
+    private int totalPaginas;
+    private ICollection<EditoraResponse>? editorasPorPagina;
+
+    protected override async Task OnInitializedAsync()
+    {
+        editoras = await editoraAPI.GetEditorasAsync();
+
+        if(editoras is not null)
+        {
+            editoras = editoras.OrderByDescending(a => a.Id).ToList();
+            totalItens = editoras.Count();
+            totalPaginas = Convert.ToInt32(Math.Ceiling((totalItens * 1.0) / tamanho));
+            this.PaginaMudou(1);
+        }
+    }
+
+    private void PaginaMudou(int pageNumber)
+    {
+        var indice = pageNumber - 1;
+        editorasPorPagina = editoras!
+            .Skip(tamanho * indice)
+            .Take(tamanho)
+            .ToList();
+    }
+}

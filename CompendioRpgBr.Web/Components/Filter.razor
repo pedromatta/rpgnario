@@ -1,0 +1,84 @@
+@inject EditoraAPI editoraAPI
+@inject GeneroAPI generoAPI
+@inject NavigationManager navigationManager
+
+<MudSelect T="string" Label="Filtrar" Variant="Variant.Text" @bind-value="filtroSelecionado">
+    <MudSelectItem Value=@("Todos")/>
+    <MudSelectItem Value=@("Generos")/>
+    <MudSelectItem Value=@("Editoras")/>
+</MudSelect>
+
+@if(filtroSelecionado == "Generos")
+{
+    <MudSelect T="GeneroResponse" Class="ml-2" Label="Gêneros" 
+    Variant="Variant.Text" ValueChanged="GeneroSelecionado" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+        @if (generos is not null)
+        {
+            @foreach(var genero in generos)
+            {
+                <MudSelectItem Value="genero" />
+            }
+        }
+    </MudSelect>
+}
+else if(filtroSelecionado == "Editoras")
+{
+    <MudSelect T="EditoraResponse" Class="ml-2" Label="Editora" 
+    Variant="Variant.Text" ValueChanged="EditoraSelecionada" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter" Disabled="@(filtroSelecionado != "Editoras")">
+        @if (editoras is not null)
+        {
+            @foreach(var editora in editoras)
+            {
+                <MudSelectItem Value="editora" />
+            }
+        }
+    </MudSelect>
+}
+
+
+<MudButton Variant="Variant.Text"
+    @onclick="Filtrar"
+    Class="ml-auto">
+    Ok
+</MudButton>
+
+@code {
+
+    private ICollection<EditoraResponse>? editoras;
+    private ICollection<GeneroResponse>? generos;
+
+    private string? nomeEditoraSelecionada { get; set; }
+    private string? nomeGeneroSelecionado { get; set; }
+
+    private string filtroSelecionado = "Todos";
+    protected override async Task OnInitializedAsync()
+    {
+        editoras = await editoraAPI.GetEditorasAsync();
+        generos = await generoAPI.GetGenerosAsync();
+    }
+    private void EditoraSelecionada(EditoraResponse editoraSelecionada)
+    {
+        nomeEditoraSelecionada = editoraSelecionada.Nome;
+    }
+    private void GeneroSelecionado(GeneroResponse generoSelecionado)
+    {
+        nomeGeneroSelecionado = generoSelecionado.Nome;
+    }
+    private void Filtrar()
+    {
+        switch(filtroSelecionado)
+        {
+            case "Todos":
+                navigationManager.NavigateTo("/Sistemas/");
+                break;
+            case "Generos":
+                if(!string.IsNullOrWhiteSpace(nomeGeneroSelecionado))
+                    navigationManager.NavigateTo($"/SistemasPorGenero/{nomeGeneroSelecionado}");
+                break;
+            case "Editoras":
+                if(!string.IsNullOrWhiteSpace(nomeEditoraSelecionada))
+                    navigationManager.NavigateTo($"/SistemasPorEditora/{nomeEditoraSelecionada}");
+                break;
+        }
+    }
+}

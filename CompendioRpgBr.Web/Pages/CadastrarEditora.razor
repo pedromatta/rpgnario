@@ -1,0 +1,86 @@
+@page "/CadastrarEditora"
+@inject EditoraAPI editoraAPI
+@inject NavigationManager navigationManager
+<MudPaper Class="px-8 pt-2 pb-4 mx-12 my-8 justify-center">
+    <div class="d-flex justify-space-between mt-8">
+        <MudText Typo="Typo.h4">Cadastro da Editora</MudText>
+        <MudButton Variant="Variant.Text" @onclick="Voltar" Color="Color.Surface">
+            <MudIcon Icon="@Icons.Material.Filled.ArrowBack"></MudIcon>
+        </MudButton>
+    </div>
+    <MudForm>
+        <MudTextField Class="mt-4" T="string" Placeholder="Nome da Editora"
+                    Variant="Variant.Outlined"
+                    @bind-Value="nome"
+                    Required="true"
+                    RequiredError="Campo obrigatorio." />
+
+        <MudTextField Class="mt-4" T="string" Placeholder="Tipo da Editora"
+                    Variant="Variant.Outlined"
+                    @bind-Value="tipo"
+                    Required="true"
+                    RequiredError="Campo obrigatorio." />
+
+        <MudTextField Class="mt-4" T="string" Placeholder="Site oficial"
+                    Variant="Variant.Outlined"
+                    @bind-Value="siteOficial"
+                    Required="false" />
+
+        <MudImage Class="mt-4" src="@fileImage" />
+        <MudFileUpload T="IBrowserFile" Accept=".jpeg" FilesChanged="UploadFile" >
+            <ActivatorContent>
+                <MudButton HtmlTag="label"
+                            Variant="Variant.Filled"
+                            Color="Color.Primary"
+                            StartIcon="@Icons.Material.Filled.PhotoCamera">
+                    Foto de Perfil
+                </MudButton>
+            </ActivatorContent>
+        </MudFileUpload>
+
+        
+        <div class="d-flex align-center justify-space-between mt-4">
+            <MudButton Variant="Variant.Filled"
+                    @onclick="Cadastrar"
+                    Color="Color.Primary"
+                    Class="ml-auto">
+                    Cadastrar
+            </MudButton>
+        </div>
+    </MudForm>
+</MudPaper>
+
+@code {
+    private string? nome;
+    private string? tipo;
+    private string? siteOficial;
+    private string? fileImage;
+    private string? fotoPerfil;
+
+    private void Voltar()
+    {
+        navigationManager.NavigateTo("/Editoras");
+    }
+
+    private async Task Cadastrar()
+    {
+        var request = new EditoraRequest(nome!, tipo!, siteOficial ?? "", fotoPerfil);
+        await editoraAPI.PostEditoraAsync(request);
+        navigationManager.NavigateTo("/Editoras");
+    }
+
+    private async Task UploadFile(IBrowserFile file)
+    {
+        var format = "image/jpeg";
+        var resizedImage = await file.RequestImageFileAsync(format, 200, 200);
+
+        using var fileStream = resizedImage.OpenReadStream();
+        using var memoryStream = new MemoryStream();
+        await fileStream.CopyToAsync(memoryStream);
+
+        var imageUpload = Convert.ToBase64String(memoryStream.ToArray());
+        fileImage = $"data:{format};base64,{imageUpload}";
+
+        fotoPerfil = imageUpload;
+    }
+}
