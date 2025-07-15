@@ -2,8 +2,8 @@
 @inject SistemaAPI sistemaAPI
 
 <MudStack Class="mt-4 mb-4" Row="true" Justify="Justify.SpaceBetween">
-    <MudText Class="mb-4" Typo="Typo.h4">Sistemas Registrados</MudText>
-    <div class="mb-4 d-flex justify-space-between">
+    <MudText Class="mb-4" Typo="Typo.h4"><b>Sistemas Registrados</b></MudText>
+    <div class="mb-4 d-flex justify-space-between rpg-surface-container">
         <Filter></Filter>
         <MudPagination Count="@totalPaginas" SelectedChanged="PaginaMudou"></MudPagination>
     </div>

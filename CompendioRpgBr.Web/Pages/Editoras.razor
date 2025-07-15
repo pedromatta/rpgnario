@@ -2,7 +2,7 @@
 @inject EditoraAPI editoraAPI
 
 <MudStack Class="mt-4 mb-4 justify-space-between" Row="true">
-    <MudText Class="mb-4" Typo="Typo.h4">Editoras Cadastradas</MudText>
+    <MudText Class="mb-4" Typo="Typo.h4"><b>Editoras Cadastradas</b></MudText>
     <MudPagination Count="@totalPaginas" SelectedChanged="PaginaMudou"></MudPagination>
 </MudStack>
 @if(editorasPorPagina is not null)

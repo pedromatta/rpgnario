@@ -3,7 +3,7 @@
 @inject NavigationManager navigationManager
 <MudPaper Class="px-8 pt-2 pb-4 mx-12 my-8 justify-center">
     <div class="d-flex justify-space-between mt-8">
-        <MudText Typo="Typo.h4">Cadastro da Editora</MudText>
+        <MudText Typo="Typo.h4"><b>Cadastro da Editora</b></MudText>
         <MudButton Variant="Variant.Text" @onclick="Voltar" Color="Color.Surface">
             <MudIcon Icon="@Icons.Material.Filled.ArrowBack"></MudIcon>
         </MudButton>
@@ -26,20 +26,19 @@
                     @bind-Value="siteOficial"
                     Required="false" />
 
-        <MudImage Class="mt-4" src="@fileImage" />
-        <MudFileUpload T="IBrowserFile" Accept=".jpeg" FilesChanged="UploadFile" >
-            <ActivatorContent>
-                <MudButton HtmlTag="label"
-                            Variant="Variant.Filled"
-                            Color="Color.Primary"
-                            StartIcon="@Icons.Material.Filled.PhotoCamera">
-                    Foto de Perfil
-                </MudButton>
-            </ActivatorContent>
-        </MudFileUpload>
 
-        
         <div class="d-flex align-center justify-space-between mt-4">
+            <MudImage Class="mt-4" src="@fileImage" />
+            <MudFileUpload T="IBrowserFile" Accept=".jpeg" FilesChanged="UploadFile" >
+                <ActivatorContent>
+                    <MudButton HtmlTag="label"
+                                Variant="Variant.Filled"
+                                Color="Color.Primary"
+                                StartIcon="@Icons.Material.Filled.PhotoCamera">
+                        Foto de Perfil
+                    </MudButton>
+                </ActivatorContent>
+            </MudFileUpload>
             <MudButton Variant="Variant.Filled"
                     @onclick="Cadastrar"
                     Color="Color.Primary"

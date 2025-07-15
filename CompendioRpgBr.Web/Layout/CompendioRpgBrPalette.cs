@@ -7,10 +7,14 @@ public sealed class CompendioRpgBrPalette : PaletteDark
 {
     private CompendioRpgBrPalette()
     {
-        Primary = new MudColor("#9966FF");
-        Secondary = new MudColor("#F6AD31");
-        Tertiary = new MudColor("#8AE491");
-    }
+        Primary = new MudColor("#A1887F");
+        Secondary = new MudColor("#558B2F");
+        Tertiary = new MudColor("#BF360C");
 
+        Background = new MudColor("#212121");
+        Surface = new MudColor("#333333");
+        DrawerBackground = new MudColor("#212121");
+        AppbarBackground = new MudColor("#272727");
+    }
     public static CompendioRpgBrPalette CreatePalette => new();
 }

@@ -1,3 +1,5 @@
+/* MainLayout.razor.css */
+
 .page {
     position: relative;
     display: flex;
@@ -6,15 +8,16 @@
 
 main {
     flex: 1;
+    /* O fundo da área principal é definido globalmente em app.css */
 }
 
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    background: #2C2C2C; /* Paleta: DrawerBackground (Cinza Pergaminho) */
 }
 
 .top-row {
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
+    background-color: #FBF7F1; /* Paleta: Surface (Bege Papiro) */
+    border-bottom: 1px solid #EAEAEA; /* Paleta: Background (Cinza Suave) */
     justify-content: flex-end;
     height: 3.5rem;
     display: flex;
@@ -25,6 +28,7 @@ main {
         white-space: nowrap;
         margin-left: 1.5rem;
         text-decoration: none;
+        color: #5D4037; /* Paleta: Primary */
     }
 
     .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
