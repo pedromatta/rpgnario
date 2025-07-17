@@ -63,16 +63,27 @@ public static class SistemasExtensions
             return Results.Ok(sistemasResponse);
         });
 
-        app.MapPost("/Sistemas", ([FromServices] DAL<Sistema> dal, [FromServices] DAL<Genero> generoDal, [FromBody] SistemaRequest sistemaRequest) =>
+        app.MapPost("/Sistemas", async ([FromServices] IHostEnvironment env, [FromServices] DAL<Sistema> dal, [FromServices] DAL<Genero> generoDal, [FromBody] SistemaRequest sistemaRequest) =>
         {
+            var nome = sistemaRequest.Nome.Replace(" ", "_");
+            var imagemSistema = DateTime.Now.ToString("ddMMyyyyhhss") + "." + nome + ".jpg";
+
+            var path = Path.Combine(env.ContentRootPath, "wwwroot", "FotosSistema", imagemSistema);
+
+            using MemoryStream ms = new MemoryStream(Convert.FromBase64String(sistemaRequest.Foto!));
+            using FileStream fs = new(path, FileMode.Create);
+            await ms.CopyToAsync(fs);
+
             var sistema = new Sistema(sistemaRequest.Nome, sistemaRequest.Link, sistemaRequest.Descricao, sistemaRequest.AnoLancamento)
             {
                 EditoraId = sistemaRequest.EditoraId,
                 Engine = sistemaRequest.Engine,
                 Generos = sistemaRequest.Generos is not null ?
                 GeneroRequestConverter(sistemaRequest.Generos, generoDal) :
-                new List<Genero>()
+                new List<Genero>(),
+                Foto = $"/FotosSistema/{imagemSistema}"
             };
+
             dal.Adicionar(sistema);
             return Results.Ok();
         });
@@ -89,8 +100,17 @@ public static class SistemasExtensions
             return Results.NoContent();
         });
 
-        app.MapPut("/Sistemas", ([FromServices] DAL<Sistema> dal, [FromServices] DAL<Genero> generoDal, [FromBody] SistemaRequestEdit sistemaRequestEdit) =>
+        app.MapPut("/Sistemas", async ([FromServices] IHostEnvironment env, [FromServices] DAL<Sistema> dal, [FromServices] DAL<Genero> generoDal, [FromBody] SistemaRequestEdit sistemaRequestEdit) =>
         {
+            var nome = sistemaRequestEdit.Nome.Replace(" ", "_");
+            var imagemSistema = DateTime.Now.ToString("ddMMyyyyhhss") + "." + nome + ".jpg";
+
+            var path = Path.Combine(env.ContentRootPath, "wwwroot", "FotosSistema", imagemSistema);
+
+            using MemoryStream ms = new MemoryStream(Convert.FromBase64String(sistemaRequestEdit.Foto!));
+            using FileStream fs = new(path, FileMode.Create);
+            await ms.CopyToAsync(fs);
+
             var sistemaAtualizar = dal.RecuperarPor(s => s.Id == sistemaRequestEdit.Id);
 
             if (sistemaAtualizar is null)
@@ -103,6 +123,7 @@ public static class SistemasExtensions
             sistemaAtualizar.Descricao = sistemaRequestEdit.Descricao;
             sistemaAtualizar.Engine = sistemaRequestEdit.Engine;
             sistemaAtualizar.AnoLancamento = sistemaRequestEdit.AnoLancamento;
+            sistemaAtualizar.Foto = $"/FotosSistema/{imagemSistema}";
 
             if (sistemaRequestEdit.Generos is not null)
             {
