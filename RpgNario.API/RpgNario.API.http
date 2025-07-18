@@ -1,0 +1,6 @@
+@RpgNario_HostAddress = http://localhost:5100
+
+GET {{RpgNario_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
