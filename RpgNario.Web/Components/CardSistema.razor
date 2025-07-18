@@ -40,9 +40,11 @@
         <MudLink Href="@Sistema!.Link">Link para o Sistema</MudLink>
     </MudCardContent>
     <MudCardActions>
-        <MudButton Color="Color.Warning" Variant="Variant.Outlined" Href=@($"/EditarSistema/{Sistema!.Nome}")>
-            Editar
-        </MudButton>
+        <AuthorizeView>
+            <MudButton Color="Color.Warning" Variant="Variant.Outlined" Href=@($"/EditarSistema/{Sistema!.Nome}")>
+                Editar
+            </MudButton>
+        </AuthorizeView>
     </MudCardActions>
 </MudCard>
 

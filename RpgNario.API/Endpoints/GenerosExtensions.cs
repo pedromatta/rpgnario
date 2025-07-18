@@ -11,8 +11,9 @@ public static class GenerosExtensions
     public static void AddEndPointsGeneros(this WebApplication app)
     {
         var groupBuilder = app.MapGroup("generos").RequireAuthorization().WithTags("Generos");
+        var groupBuilderOpen = app.MapGroup("generos").WithTags("Generos");
 
-        groupBuilder.MapGet("", ([FromServices] DAL<Genero> dal) =>
+        groupBuilderOpen.MapGet("", ([FromServices] DAL<Genero> dal) =>
         {
             var generos = dal.Listar();
             if (generos is null)
@@ -23,7 +24,7 @@ public static class GenerosExtensions
             return Results.Ok(generosResponse);
         });
 
-        groupBuilder.MapGet("{nome}", ([FromServices] DAL<Genero> dal, string nome) =>
+        groupBuilderOpen.MapGet("{nome}", ([FromServices] DAL<Genero> dal, string nome) =>
         {
             var genero = dal.RecuperarPor(g => g.Nome.ToUpper().Equals(nome.ToUpper()));
             if (genero is null)
@@ -33,7 +34,7 @@ public static class GenerosExtensions
             return Results.Ok(EntityToResponse(genero));
         });
 
-        groupBuilder.MapGet("Sistema/{nomeSistema}", ([FromServices] DAL<Genero> dal, [FromServices] DAL<Sistema> dalSistema, string nomeSistema) =>
+        groupBuilderOpen.MapGet("Sistema/{nomeSistema}", ([FromServices] DAL<Genero> dal, [FromServices] DAL<Sistema> dalSistema, string nomeSistema) =>
         {
             var sistema = dalSistema.RecuperarPor(s => s.Nome.ToUpper().Equals(nomeSistema.ToUpper()));
             var generos = dal.Listar();

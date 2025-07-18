@@ -1,5 +1,6 @@
 @page "/SistemasPorEditora/{nomeEditora}"
 @inject SistemaAPI sistemaAPI
+@attribute [AllowAnonymous]
 
 <MudStack Class="mt-4 mb-4" Row="true" Justify="Justify.SpaceBetween">
     <MudText Class="mb-4" Typo="Typo.h4"><b>Sistemas da Editora: @nomeEditora</b></MudText>

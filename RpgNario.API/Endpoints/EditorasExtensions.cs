@@ -10,8 +10,9 @@ public static class EditorasExtensions
     public static void AddEndpointsEditoras(this WebApplication app)
     {
         var groupBuilder = app.MapGroup("editoras").RequireAuthorization().WithTags("Editoras");
+        var groupBuilderOpen = app.MapGroup("editoras").WithTags("Editoras");
 
-        groupBuilder.MapGet("", ([FromServices] DAL<Editora> dal) =>
+        groupBuilderOpen.MapGet("", ([FromServices] DAL<Editora> dal) =>
         {
             var editoras = dal.Listar();
             if (editoras is null)
@@ -22,7 +23,7 @@ public static class EditorasExtensions
             return Results.Ok(editorasResponse);
         });
 
-        groupBuilder.MapGet("{nome}", ([FromServices] DAL<Editora> dal, string nome) =>
+        groupBuilderOpen.MapGet("{nome}", ([FromServices] DAL<Editora> dal, string nome) =>
         {
             var editora = dal.RecuperarPor(e => e.Nome.ToUpper().Equals(nome.ToUpper()));
             if (editora is null)

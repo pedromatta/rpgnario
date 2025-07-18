@@ -4,6 +4,8 @@ using RpgNario.Banco;
 using RpgNario.Modelos;
 using RpgNario.API.Endpoints;
 using RpgNario.Shared.Dados.Modelos;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +53,11 @@ app.AddEndPointsSistemas();
 app.AddEndPointsGeneros();
 
 app.MapGroup("auth").MapIdentityApi<PessoaComAcesso>().WithTags("Autorizacao");
+app.MapPost("auth/logout", async ([FromServices] SignInManager<PessoaComAcesso> signInManager) => 
+{
+    await signInManager.SignOutAsync();
+    return Results.Ok();
+}).RequireAuthorization().WithTags("Autorizacao");
 
 app.UseSwagger();
 app.UseSwaggerUI();

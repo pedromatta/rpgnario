@@ -10,12 +10,21 @@
         <MudLink Href="@Editora!.SiteOficial">Link da Editora</MudLink>
     </MudCardContent>
     <MudCardActions>
-        <MudButton Color="Color.Warning" Variant="Variant.Outlined" Href=@($"/EditarEditora/{Editora!.Nome}")>
-            Editar
-        </MudButton>
-        <MudButton Color="Color.Primary" Variant="Variant.Outlined" Href=@($"/SistemasPorEditora/{Editora!.Nome}") Class="ml-4">
-            Sistemas
-        </MudButton>
+        <AuthorizeView>
+            <Authorized>
+                <MudButton Color="Color.Warning" Variant="Variant.Outlined" Href=@($"/EditarEditora/{Editora!.Nome}")>
+                    Editar
+                </MudButton>
+                <MudButton Color="Color.Primary" Variant="Variant.Outlined" Href=@($"/SistemasPorEditora/{Editora!.Nome}") Class="ml-4">
+                    Sistemas
+                </MudButton>
+            </Authorized>
+            <NotAuthorized>
+                <MudButton Color="Color.Primary" Variant="Variant.Outlined" Href=@($"/SistemasPorEditora/{Editora!.Nome}")>
+                    Sistemas
+                </MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
     </MudCardActions>
 </MudCard>
 

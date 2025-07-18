@@ -11,8 +11,9 @@ public static class SistemasExtensions
     public static void AddEndPointsSistemas(this WebApplication app)
     {
         var groupBuilder = app.MapGroup("sistemas").RequireAuthorization().WithTags("Sistemas");
+        var groupBuilderOpen = app.MapGroup("sistemas").WithTags("Sistemas");
 
-        groupBuilder.MapGet("", ([FromServices] DAL<Sistema> dal) =>
+        groupBuilderOpen.MapGet("", ([FromServices] DAL<Sistema> dal) =>
         {
             var sistemas = dal.Listar();
             if (sistemas is null)
@@ -23,7 +24,7 @@ public static class SistemasExtensions
             return Results.Ok(sistemasResponse);
         });
 
-        groupBuilder.MapGet("{nome}", ([FromServices] DAL<Sistema> dal, string nome) =>
+        groupBuilderOpen.MapGet("{nome}", ([FromServices] DAL<Sistema> dal, string nome) =>
         {
             var sistema = dal.RecuperarPor(s => s.Nome.ToUpper().Equals(nome.ToUpper()));
             if (sistema is null)
@@ -33,7 +34,7 @@ public static class SistemasExtensions
             return Results.Ok(EntityToResponse(sistema));
         });
 
-        groupBuilder.MapGet("Editora/{nomeEditora}", ([FromServices] DAL<Sistema> dal, string nomeEditora) =>
+        groupBuilderOpen.MapGet("Editora/{nomeEditora}", ([FromServices] DAL<Sistema> dal, string nomeEditora) =>
         {
             var sistemas = dal.Listar();
             if (sistemas is null)
@@ -51,7 +52,7 @@ public static class SistemasExtensions
             return Results.Ok(sistemasResponse);
         });
 
-        groupBuilder.MapGet("Genero/{nomeGenero}", ([FromServices] DAL<Sistema> dal, string nomeGenero) =>
+        groupBuilderOpen.MapGet("Genero/{nomeGenero}", ([FromServices] DAL<Sistema> dal, string nomeGenero) =>
         {
             var sistemas = dal.Listar();
             if (sistemas is null)
