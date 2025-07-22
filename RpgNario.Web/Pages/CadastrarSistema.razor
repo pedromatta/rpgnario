@@ -86,7 +86,6 @@
                       RequiredError="Campo obrigatório." />
 
         <div class="d-flex align-center justify-space-between mt-4">
-            <MudImage Class="mt-4" src="@fileImage" />
             <MudFileUpload T="IBrowserFile" Accept=".jpeg" FilesChanged="UploadFile" >
                 <ActivatorContent>
                     <MudButton HtmlTag="label"
@@ -104,6 +103,7 @@
                 Cadastrar
             </MudButton>
         </div>
+        <MudImage Class="mt-4" src="@fileImage" Width="200"/>
 
     </MudForm>
 </MudPaper>

@@ -3,6 +3,8 @@ using RpgNario.API.Requests;
 using RpgNario.Banco;
 using RpgNario.Modelos;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using RpgNario.Shared.Dados.Modelos;
 
 namespace RpgNario.API.Endpoints;
 
@@ -64,6 +66,33 @@ public static class SistemasExtensions
 
             var sistemasResponse = EntityListToResponseList(sistemasComOGenero);
             return Results.Ok(sistemasResponse);
+        });
+
+        groupBuilderOpen.MapGet("{id}/Avaliacao", (
+            HttpContext context,
+            [FromServices] DAL<Sistema> dalSistema,
+            [FromServices] DAL<PessoaComAcesso> dalPessoa,
+            int id
+            ) =>
+        {
+            var sistema = dalSistema.RecuperarPor(s => s.Id == id);
+            if (sistema is null)
+            {
+                return Results.NotFound();
+            }
+
+            var email = context.User.Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value
+                ?? throw new InvalidOperationException("Pessoa não está conectada");
+
+            var pessoa = dalPessoa.RecuperarPor(p => p.Email!.Equals(email))
+                ?? throw new InvalidOperationException("Pessoa não está conectada");
+
+            var avaliacao = sistema.Avaliacoes.FirstOrDefault(a => a.PessoaId == pessoa.Id);
+
+            var response = new AvaliacaoSistemaResponse(sistema.Id, avaliacao is not null ? avaliacao.Nota : 0);
+
+            return Results.Ok(response);
         });
 
         groupBuilder.MapPost("", async ([FromServices] IHostEnvironment env, [FromServices] DAL<Sistema> dal, [FromServices] DAL<Genero> generoDal, [FromBody] SistemaRequest sistemaRequest) =>
@@ -137,6 +166,41 @@ public static class SistemasExtensions
             return Results.Ok();
         });
 
+        groupBuilder.MapPost("avaliacao", (
+            HttpContext context,
+            [FromBody] AvaliacaoSistemaRequest request,
+            [FromServices] DAL<Sistema> dalSistema,
+            [FromServices] DAL<PessoaComAcesso> dalPessoa
+            ) =>
+        {
+            var sistema = dalSistema.RecuperarPor(s => s.Id == request.SistemaId);
+            if (sistema is null) return Results.NotFound();
+
+            var email = context.User.Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value
+                ?? throw new InvalidOperationException("Pessoa não está conectada");
+
+            var pessoa = dalPessoa.RecuperarPor(p => p.Email!.Equals(email))
+                ?? throw new InvalidOperationException("Pessoa não está conectada");
+
+            var avaliacao = sistema.Avaliacoes
+                .FirstOrDefault(
+                    s => s.SistemaId == sistema.Id
+                    && s.PessoaId == pessoa.Id
+                );
+
+            if (avaliacao is null)
+            {
+                sistema.AdicionarNota(pessoa.Id, request.Nota);
+            }
+            else
+            {
+                avaliacao.Nota = request.Nota;
+            }
+
+            dalSistema.Atualizar(sistema);
+            return Results.Created();
+        });
     }
 
     private static ICollection<Genero> GeneroRequestConverter(ICollection<GeneroRequest> generos, DAL<Genero> generoDal)
@@ -174,6 +238,13 @@ public static class SistemasExtensions
     private static SistemaResponse EntityToResponse(Sistema sistema)
     {
         var generos = sistema.Generos is null ? new List<string>() : sistema.Generos.Select(g => g.Nome).ToList();
-        return new SistemaResponse(sistema.Id, sistema.Nome, sistema.Link, sistema.Descricao, sistema.Engine ?? "Não especificada", sistema.AnoLancamento, sistema.Editora!.Id, sistema.Editora!.Nome, sistema.Foto ?? "", generos);
+        return new SistemaResponse(sistema.Id, sistema.Nome, sistema.Link, sistema.Descricao, sistema.Engine ?? "Não especificada", sistema.AnoLancamento, sistema.Editora!.Id, sistema.Editora!.Nome, sistema.Foto ?? "", generos)
+        {
+            Classificacao = sistema
+                .Avaliacoes
+                .Select(a => a.Nota)
+                .DefaultIfEmpty(0)
+                .Average()
+        };
     }
 }

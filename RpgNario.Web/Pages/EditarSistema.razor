@@ -21,8 +21,8 @@
                       Required="true"
                       RequiredError="Campo obrigatório." />
 
-       <MudSelect Class="mt-4" T="EditoraResponse" Label="Editoras" 
-        Variant="Variant.Outlined" ValueChanged="EditoraSelecionada" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+       <MudSelect Class="mt-4" T="EditoraResponse" Label="Editoras"
+        Variant="Variant.Outlined" Value="EditoraDoSistema" ValueChanged="EditoraSelecionada" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
             @if (editoras is not null)
             {
                 @foreach(var editora in editoras)
@@ -87,7 +87,6 @@
 
         <div class="d-flex align-center justify-space-between mt-4">
             <div class="d-flex align-center justify-start">
-                <MudImage Class="mt-4" src="@fileImage" />
                 <MudFileUpload T="IBrowserFile" Accept=".jpeg" FilesChanged="UploadFile" >
                     <ActivatorContent>
                         <MudButton HtmlTag="label"
@@ -100,6 +99,11 @@
                 </MudFileUpload>
             </div>
             <div class="d-flex align-center justify-end">
+                <MudRating
+                    Class="mr-2"
+                    @bind-SelectedValue="Classificacao"
+                    @onclick="AvaliarSistema"/>
+
                 <MudButton Variant="Variant.Filled"
                         @onclick="Deletar"
                         Color="Color.Warning">
@@ -113,6 +117,7 @@
                 </MudButton>
             </div>
         </div>
+        <MudImage Class="mt-4" src="@fileImage" Width="200" />
 
     </MudForm>
 </MudPaper>
@@ -130,6 +135,8 @@
     private string? novoGenero;
     private int anoLancamento;
 
+    private int Classificacao;
+
     private SistemaResponse? Sistema { get; set; }
     private ICollection<EditoraResponse>? editoras;
     private ICollection<GeneroResponse>? generos;
@@ -141,6 +148,8 @@
         editoras = await editoraAPI.GetEditorasAsync();
         generos = await generoAPI.GetGenerosAsync();
         Sistema = await sistemaAPI.GetSistemaPorNomeAsync(NomeSistema!);
+        var avaliacaoDaPessoaLogada = await sistemaAPI.GetAvaliacaoDaPessoaLogadaAsync(Sistema!.Id);
+        Classificacao = Convert.ToInt32(avaliacaoDaPessoaLogada!.Nota);
 
         nome = Sistema!.Nome;
         link = Sistema!.Link;
@@ -151,6 +160,30 @@
         {
             fileImage = $"http://localhost:5100{Sistema!.Foto}";
         }
+
+        if(Sistema!.AnoLancamento != 0)
+        {
+            anoLancamento = Sistema!.AnoLancamento;
+        }
+
+        if(Sistema!.GenerosNomes is not null)
+        {
+            foreach (var nome in Sistema!.GenerosNomes)
+            {
+                var genero = generos!.FirstOrDefault(g => g.Nome.Equals(nome));
+                if (genero is null)
+                {
+                    continue;
+                } 
+                GeneroSelecionado(genero);
+            }
+        }
+
+        var editora = editoras!.FirstOrDefault(e => e.Id == Sistema!.EditoraId);
+
+        if (editora is null) return;
+
+        EditoraSelecionada(editora);
     }
     private void Voltar()
     {
@@ -216,5 +249,10 @@
         fileImage = $"data:{format};base64,{imageUpload}";
 
         fotoPerfil = imageUpload;
+    }
+
+    private async Task AvaliarSistema()
+    {
+        await sistemaAPI.AvaliarSistemaAsync(Sistema!.Id, Classificacao);
     }
 }

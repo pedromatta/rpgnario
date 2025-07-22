@@ -34,7 +34,7 @@
         sistemas = await sistemaAPI.GetSistemasAsync();
         if (sistemas is not null)
         {
-            sistemas = sistemas.OrderByDescending(a => a.Id).ToList();
+            sistemas = sistemas.OrderBy(a => a.Nome).ToList();
             totalItens = sistemas.Count();
             totalPaginas = Convert.ToInt32(Math.Ceiling((totalItens * 1.0) / tamanho));
             this.PaginaMudou(1);

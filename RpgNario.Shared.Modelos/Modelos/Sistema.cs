@@ -22,6 +22,7 @@ public class Sistema
     public int? EditoraId { get; set; }
     public virtual Editora? Editora { get; set; }
     public virtual ICollection<Genero>? Generos { get; set; }
+    public virtual ICollection<AvaliacaoSistema> Avaliacoes { get; set; } = new List<AvaliacaoSistema>();
 
     public void ExibirFichaTecnica()
     {
@@ -31,6 +32,18 @@ public class Sistema
                 Engine: {Engine}
                 Ano de Lançamento: {AnoLancamento}");
 
+    }
+
+    public void AdicionarNota(int pessoaId, int nota)
+    {
+        nota = Math.Clamp(nota, 1, 5);
+
+        Avaliacoes.Add(new AvaliacaoSistema()
+        {
+            SistemaId = this.Id,
+            PessoaId = pessoaId,
+            Nota = nota
+        });
     }
 
     public override string ToString()

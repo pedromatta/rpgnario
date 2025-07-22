@@ -26,11 +26,8 @@
                     Variant="Variant.Outlined"
                     @bind-Value="siteOficial"
                     Required="false" />
-        
-
         <div class="d-flex align-center justify-space-between">
             <div class="d-flex align-center justify-start mt-4">
-                <MudImage Class="mt-4 mr-2" src="@fileImage" />
                 <MudFileUpload T="IBrowserFile" Accept=".jpeg, .jpg, .png" FilesChanged="UploadFile" >
                     <ActivatorContent>
                         <MudButton HtmlTag="label"
@@ -57,7 +54,7 @@
                 </MudButton>
             </div>
         </div>
-
+        <MudImage Class="mt-4 mr-2" src="@fileImage" Width="200"/>
     </MudForm>
 </MudPaper>
 

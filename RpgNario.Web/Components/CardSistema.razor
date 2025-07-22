@@ -38,6 +38,7 @@
             }
         </MudText>
         <MudLink Href="@Sistema!.Link">Link para o Sistema</MudLink>
+        <div><MudRating ReadOnly SelectedValue="@Convert.ToInt32(Sistema!.Classificacao)"/></div>
     </MudCardContent>
     <MudCardActions>
         <AuthorizeView>

@@ -25,6 +25,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddTransient<DAL<Editora>>();
 builder.Services.AddTransient<DAL<Sistema>>();
 builder.Services.AddTransient<DAL<Genero>>();
+builder.Services.AddTransient<DAL<PessoaComAcesso>>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

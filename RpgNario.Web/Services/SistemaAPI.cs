@@ -30,6 +30,16 @@ public class SistemaAPI
         return await _httpClient.GetFromJsonAsync<SistemaResponse>($"sistemas/{nome}");
     }
 
+    public async Task<AvaliacaoSistemaResponse?> GetAvaliacaoDaPessoaLogadaAsync(int sistemaId)
+    {
+        return await _httpClient.GetFromJsonAsync<AvaliacaoSistemaResponse?>($"sistemas/{sistemaId}/avaliacao");
+    }
+
+    public async Task AvaliarSistemaAsync(int sistemaId, double nota)
+    {
+        await _httpClient.PostAsJsonAsync("sistemas/avaliacao", new { sistemaId, nota });
+    }
+
     public async Task PostSistemaAsync(SistemaRequest request)
     {
         await _httpClient.PostAsJsonAsync("sistemas", request);

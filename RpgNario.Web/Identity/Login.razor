@@ -40,6 +40,8 @@
 </MudPaper>
 
 @code {
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
     private string? email;
     private string? senha;
 
@@ -47,6 +49,7 @@
     private bool success;
 
     private string[]? errorList;
+
     MudForm? form;
 
     private async Task FazerLogin()
@@ -73,6 +76,12 @@
             success = true;
             errorList = [];
             email = senha = string.Empty;
+
+            if (ReturnUrl is not null)
+            {
+                navigationManager.NavigateTo(ReturnUrl);
+            }
+
         } else 
         {
             errors = true;

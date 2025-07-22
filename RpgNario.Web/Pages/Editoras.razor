@@ -31,7 +31,7 @@
 
         if(editoras is not null)
         {
-            editoras = editoras.OrderByDescending(a => a.Id).ToList();
+            editoras = editoras.OrderBy(a => a.Nome).ToList();
             totalItens = editoras.Count();
             totalPaginas = Convert.ToInt32(Math.Ceiling((totalItens * 1.0) / tamanho));
             this.PaginaMudou(1);

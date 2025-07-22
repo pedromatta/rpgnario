@@ -9,12 +9,13 @@ public class RpgNarioContext : IdentityDbContext<PessoaComAcesso, PerfilDeAcesso
     public required DbSet<Editora> Editoras { get; set; }
     public required DbSet<Sistema> Sistemas { get; set; }
     public required DbSet<Genero> Generos { get; set; }
+    public required DbSet<AvaliacaoSistema> AvaliacaoSistemas { get; set; }
 
     private string connectionString = "Server=localhost;port=3306;database=compendio_rpg_br;User=api_user;Password=insira-senha-forte;";
 
-    public RpgNarioContext(){}
+    public RpgNarioContext() { }
 
-    public RpgNarioContext(DbContextOptions options) : base(options) {}
+    public RpgNarioContext(DbContextOptions options) : base(options) { }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -142,6 +143,9 @@ public class RpgNarioContext : IdentityDbContext<PessoaComAcesso, PerfilDeAcesso
                     );
                 }
             );
+
+        modelBuilder.Entity<AvaliacaoSistema>()
+            .HasKey(a => new { a.SistemaId, a.PessoaId });
     }
 }
 
